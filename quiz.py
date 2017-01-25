@@ -71,11 +71,7 @@ class Frame(wx.Frame):
             j.SetLabel(i)
             j.Bind(wx.EVT_BUTTON, self.wrong_answer)
 
-print(0)
 app = wx.App()
-print(1)
 top = Frame(None)
-print(2)
 top.Show()
-print(3)
 app.MainLoop()

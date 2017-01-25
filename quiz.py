@@ -4,7 +4,7 @@ import random
 import json
 
 
-class MyFrame(wx.Frame):
+class Frame(wx.Frame):
     def __init__(self, *args, **kwds):
         wx.Frame.__init__(self, *args, **kwds)
         self.label_1 = wx.StaticText(self, wx.ID_ANY, (
@@ -40,21 +40,17 @@ class MyFrame(wx.Frame):
         sizer_1.Fit(self)
         self.Layout()
 
-    def right_answer(self):
+    def right_answer(self, null):
         c = wx.MessageBox("You answered the question correctly!", "Correct answer!")
-        c.ShowModal()
-        c.destroy()
         for i in [self.button_1, self.button_2, self.button_3, self.button_4]:
-            i.SetValue("RESTART")
+            i.SetLabel("RESTART")
             i.Bind(wx.EVT_BUTTON, self.ask_question)
-        self.label_1.SetValue("Press any of the buttons to ask another question.")
+        self.label_1.SetLabel("Press any of the buttons to ask another question.")
 
-    def wrong_answer(self):
+    def wrong_answer(self, null):
         c = wx.MessageBox("You gave an incorrect answer!", "Wrong answer!", wx.ICON_ERROR)
-        c.ShowModal()
-        c.destroy()
 
-    def ask_question(self):
+    def ask_question(self, null):
         buttons = [self.button_1, self.button_2, self.button_3, self.button_4]
         str_question = random.choice(list(self.quiz["questions"].keys()))
         str_answer = self.quiz["questions"][str_question]
@@ -68,14 +64,18 @@ class MyFrame(wx.Frame):
         random.shuffle(buttons)
         true_button = buttons.pop(random.randint(0, len(buttons)-1))
         false_buttons = buttons
-        self.label_1.SetValue(str_question)
-        true_button.SetValue(str_answer)
+        self.label_1.SetLabel(str_question)
+        true_button.SetLabel(str_answer)
         true_button.Bind(wx.EVT_BUTTON, self.right_answer)
         for i, j in zip(false_answers, false_buttons):
-            j.SetValue(i)
+            j.SetLabel(i)
             j.Bind(wx.EVT_BUTTON, self.wrong_answer)
 
-app = wx.App(redirect=True)
-top = MyFrame()
+print(0)
+app = wx.App()
+print(1)
+top = Frame(None)
+print(2)
 top.Show()
+print(3)
 app.MainLoop()

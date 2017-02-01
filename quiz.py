@@ -1,57 +1,51 @@
 #!/usr/bin/python3
-import wx
+import sys
+from PyQt5 import uic
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtCore import QCoreApplication
 import random
 import json
 
 
-class Frame(wx.Frame):
-    def __init__(self, *args, **kwds):
-        wx.Frame.__init__(self, *args, **kwds)
-        self.label_1 = wx.StaticText(self, wx.ID_ANY, (
-            "Press any of the buttons to begin."))
-        self.button_1 = wx.Button(self, wx.ID_ANY, ("START"))
-        self.button_2 = wx.Button(self, wx.ID_ANY, ("START"))
-        self.button_3 = wx.Button(self, wx.ID_ANY, ("START"))
-        self.button_4 = wx.Button(self, wx.ID_ANY, ("START"))
+class App(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.ui = uic.loadUi("quiz.ui", self)
 
         self.__set_properties()
-        self.__do_layout()
         self.conf = json.load(open("config.json"))
         self.quiz = self.conf["quizzes"][0]
+        self.show()
 
     def __set_properties(self):
-        self.SetTitle(("Quiz"))
-        self.SetFocus()
-        self.button_1.Bind(wx.EVT_BUTTON, self.ask_question)
-        self.button_2.Bind(wx.EVT_BUTTON, self.ask_question)
-        self.button_3.Bind(wx.EVT_BUTTON, self.ask_question)
-        self.button_4.Bind(wx.EVT_BUTTON, self.ask_question)
-
-    def __do_layout(self):
-        sizer_1 = wx.BoxSizer(wx.VERTICAL)
-        grid_sizer_1 = wx.GridSizer(2, 2, 0, 0)
-        sizer_1.Add(self.label_1, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND, 0)
-        grid_sizer_1.Add(self.button_1, 0, wx.ALIGN_CENTER, 0)
-        grid_sizer_1.Add(self.button_2, 0, wx.ALIGN_CENTER, 0)
-        grid_sizer_1.Add(self.button_3, 0, wx.ALIGN_CENTER, 0)
-        grid_sizer_1.Add(self.button_4, 0, wx.ALIGN_CENTER, 0)
-        sizer_1.Add(grid_sizer_1, 1, 0, 0)
-        self.SetSizer(sizer_1)
-        sizer_1.Fit(self)
-        self.Layout()
+        self.ui.button_1.clicked.connect(self.ask_question)
+        self.ui.button_2.clicked.connect(self.ask_question)
+        self.ui.button_3.clicked.connect(self.ask_question)
+        self.ui.button_4.clicked.connect(self.ask_question)
 
     def right_answer(self, null):
-        c = wx.MessageBox("You answered the question correctly!", "Correct answer!")
-        for i in [self.button_1, self.button_2, self.button_3, self.button_4]:
-            i.SetLabel("RESTART")
-            i.Bind(wx.EVT_BUTTON, self.ask_question)
-        self.label_1.SetLabel("Press any of the buttons to ask another question.")
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("You answered the question correctly!")
+        msg.setWindowTitle("Correct answer!")
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+        for i in [self.ui.button_1, self.ui.button_2, self.ui.button_3, self.ui.button_4]:
+            i.setText("RESTART")
+            i.clicked.disconnect()
+            i.clicked.connect(self.ask_question)
+        self.ui.label_1.setText("Press any of the buttons to ask another question.")
 
     def wrong_answer(self, null):
-        c = wx.MessageBox("You gave an incorrect answer!", "Wrong answer!", wx.ICON_ERROR)
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText("You gave an incorrect answer!")
+        msg.setWindowTitle("Wrong answer!")
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
 
     def ask_question(self, null):
-        buttons = [self.button_1, self.button_2, self.button_3, self.button_4]
+        buttons = [self.ui.button_1, self.ui.button_2, self.ui.button_3, self.ui.button_4]
         str_question = random.choice(list(self.quiz["questions"].keys()))
         str_answer = self.quiz["questions"][str_question]
         str_question = self.quiz["question_form"].format(str_question)
@@ -64,14 +58,15 @@ class Frame(wx.Frame):
         random.shuffle(buttons)
         true_button = buttons.pop(random.randint(0, len(buttons)-1))
         false_buttons = buttons
-        self.label_1.SetLabel(str_question)
-        true_button.SetLabel(str_answer)
-        true_button.Bind(wx.EVT_BUTTON, self.right_answer)
+        self.ui.label_1.setText(str_question)
+        true_button.setText(str_answer)
+        true_button.clicked.disconnect()
+        true_button.clicked.connect(self.right_answer)
         for i, j in zip(false_answers, false_buttons):
-            j.SetLabel(i)
-            j.Bind(wx.EVT_BUTTON, self.wrong_answer)
+            j.setText(i)
+            j.clicked.disconnect()
+            j.clicked.connect(self.wrong_answer)
 
-app = wx.App()
-top = Frame(None)
-top.Show()
-app.MainLoop()
+app = QApplication(sys.argv)
+top = App()
+sys.exit(app.exec_())

@@ -3,6 +3,7 @@ import argparse
 import requests
 import os
 import time
+import sys
 time_start = time.time()
 
 def log(obj, newline=True):
@@ -28,7 +29,7 @@ parser.add_argument(
 args = parser.parse_args()
 log("Arguments parsed.")
 log("Loading input file... ", newline=False)
-list = [for i in args.output.read().split("\n"): i.split(".")]
+list = [i.split(" ") for i in args.output.read().split("\n")]
 log("done.")
 
 log("Making directory `" + args.output + "`...", newline=False)
